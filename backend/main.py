@@ -8,7 +8,7 @@ from chromadb.utils import embedding_functions
 import google.generativeai as genai
 
 # 1. Configure Gemini API (Paste your key here)
-GEMINI_API_KEY = "AQ.Ab8RN6J_AhTgfJTEkr97pIM2_g9HQ8cufOiSkWGC3iSlQdTIsQ"
+GEMINI_API_KEY="AQ.Ab8RN6J_AhTgfJTEkr97pIM2_g9HQ8cufOiSkWGC3iSlQdTIsQ"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
@@ -17,11 +17,12 @@ app = FastAPI(title="ZeroG Flames Fire Safety API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows Drisya's local frontend to connect freely
-    allow_credentials=True,
+    allow_origins=["*"], 
+    allow_credentials=False,  # <-- Change this to False
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # 3. Connect to your existing Vector DB
 DB_PATH = r"D:\NASA\ZeroG_Flames\nasa_vectordb"
