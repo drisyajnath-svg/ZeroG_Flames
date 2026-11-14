@@ -24,8 +24,7 @@ def extract_text_from_pdf(pdf_path: str | Path) -> str:
 
 def main():
     # Replace with the path to your target PDF file
-    pdf_file_path = r"C:/Users/Adithyakrishna U/Desktop/NASA RESOURCES/ICES 2021-266 0503-2021 final.pdf"
-
+    pdf_file_path = r"C:/Users/Drisya J Nath/Desktop/NASA Data/Detailed FLEX Results.pdf"
     if not Path(pdf_file_path).exists():
         print(f"File '{pdf_file_path}' not found. Please provide a valid PDF path.")
         return
