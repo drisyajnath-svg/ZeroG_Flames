@@ -8,7 +8,7 @@ from chromadb.utils import embedding_functions
 import google.generativeai as genai
 
 # 1. Configure Gemini API (Paste your key here)
-GEMINI_API_KEY="AQ.Ab8RN6INmQFJAx9RLXiYCBhUmG69he0KnGCMEa6mNfW06hmxvA"
+GEMINI_API_KEY="YOUR API KEY"
 genai.configure(api_key=GEMINI_API_KEY)
 # Using gemini-3.5-flash-lite (gemini-3.8-flash exceeded free tier 20 req/day quota)
 model = genai.GenerativeModel("gemini-3.5-flash-lite")
