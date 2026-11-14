@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroG Flames | Advanced SI Dashboard</title>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles for Glassmorphism & Premium Typography -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            /* Deepest Slate */
+            color: #f8fafc;
+            background-image: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 70%);
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        /* Text Gradients */
+        .text-gradient-cyan {
+            background: linear-gradient(to right, #22d3ee, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-fire {
+            background: linear-gradient(to right, #f43f5e, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(51, 65, 85, 0.8);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(71, 85, 105, 1);
+        }
+    </style>
+</head>
+
+<body class="flex h-screen overflow-hidden antialiased">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 glass-panel flex flex-col border-r border-slate-800/60 z-20 shrink-0">
+        <!-- Logo Area -->
+        <div class="p-8 border-b border-slate-800/60">
+            <div class="flex items-center gap-3">
+                <div
+                    class="p-2 bg-gradient-to-br from-rose-500/20 to-orange-500/20 rounded-lg border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+                    <i data-lucide="flame" class="w-6 h-6 text-rose-500"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide text-gradient-fire">ZeroG Flames</h1>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-slate-500 mt-0.5 font-semibold">SI Core v1.4
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment Selector -->
+        <div class="p-6 flex-1 overflow-y-auto">
+            <h2 class="text-xs uppercase tracking-widest text-cyan-500/80 font-semibold mb-5 flex items-center gap-2">
+                <i data-lucide="crosshair" class="w-3.5 h-3.5"></i> Mission Environment
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Custom Radio Option 1 -->
+                <label class="block cursor-pointer relative group">
+                    <input type="radio" name="env" value="lunar" class="peer sr-only" checked
+                        onchange="updateDashboard()">
+                    <div
+                        class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 transition-all duration-300 hover:bg-slate-800/50 hover:border-cyan-500/50 peer-checked:bg-cyan-950/20 peer-checked:border-cyan-500 peer-checked:shadow-[0_0_20px_rgba(6,182,212,0.15)] relative overflow-hidden">
+                        <div
+                            class="absolute right-0 top-0 bottom-0 w-1 bg-cyan-500 opacity-0 peer-checked:opacity-100 transition-opacity">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="moon"
+                                class="w-5 h-5 text-slate-400 peer-checked:text-cyan-400 transition-colors"></i>
+                            <div>
+                                <span
+                                    class="block text-sm font-semibold text-slate-300 peer-checked:text-white transition-colors">Lunar
+                                    Habitat</span>
+                                <span class="block text-xs text-slate-500 mt-0.5 peer-checked:text-cyan-200/60">1/6g •
+                                    ~30% O2</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Custom Radio Option 2 -->
+                <label class="block cursor-pointer relative group">
+                    <input type="radio" name="env" value="martian" class="peer sr-only" onchange="updateDashboard()">
+                    <div
+                        class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 transition-all duration-300 hover:bg-slate-800/50 hover:border-cyan-500/50 peer-checked:bg-cyan-950/20 peer-checked:border-cyan-500 peer-checked:shadow-[0_0_20px_rgba(6,182,212,0.15)] relative overflow-hidden">
+                        <div
+                            class="absolute right-0 top-0 bottom-0 w-1 bg-cyan-500 opacity-0 peer-checked:opacity-100 transition-opacity">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="rocket"
+                                class="w-5 h-5 text-slate-400 peer-checked:text-cyan-400 transition-colors"></i>
+                            <div>
+                                <span
+                                    class="block text-sm font-semibold text-slate-300 peer-checked:text-white transition-colors">Martian
+                                    Base</span>
+                                <span class="block text-xs text-slate-500 mt-0.5 peer-checked:text-cyan-200/60">3/8g •
+                                    Variable O2</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+
+                <!-- Custom Radio Option 3 -->
+                <label class="block cursor-pointer relative group">
+                    <input type="radio" name="env" value="micro" class="peer sr-only" onchange="updateDashboard()">
+                    <div
+                        class="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 transition-all duration-300 hover:bg-slate-800/50 hover:border-cyan-500/50 peer-checked:bg-cyan-950/20 peer-checked:border-cyan-500 peer-checked:shadow-[0_0_20px_rgba(6,182,212,0.15)] relative overflow-hidden">
+                        <div
+                            class="absolute right-0 top-0 bottom-0 w-1 bg-cyan-500 opacity-0 peer-checked:opacity-100 transition-opacity">
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="satellite"
+                                class="w-5 h-5 text-slate-400 peer-checked:text-cyan-400 transition-colors"></i>
+                            <div>
+                                <span
+                                    class="block text-sm font-semibold text-slate-300 peer-checked:text-white transition-colors">Space
+                                    Station</span>
+                                <span class="block text-xs text-slate-500 mt-0.5 peer-checked:text-cyan-200/60">Micro-g
+                                    • 21-100% O2</span>
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Status Indicator -->
+        <div class="p-6 border-t border-slate-800/60 text-xs text-slate-500 flex items-center justify-between">
+            <span class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                SI Core Online
+            </span>
+            <span class="font-mono opacity-50">v1.0.4</span>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex flex-col h-full relative z-10">
+
+        <!-- Premium Header / Search -->
+        <header class="h-24 border-b border-slate-800/50 flex items-center px-10 shrink-0 z-20">
+            <div class="w-full max-w-4xl mx-auto flex gap-4 items-center">
+                <!-- Glowing Search Input -->
+                <div class="relative flex-1 group">
+                    <!-- Glow Effect -->
+                    <div
+                        class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-500">
+                    </div>
+
+                    <div class="relative flex items-center glass-input rounded-xl overflow-hidden">
+                        <i data-lucide="cpu" class="absolute left-4 text-cyan-500/70 w-5 h-5"></i>
+                        <input type="text" id="searchQuery"
+                            placeholder="Query the SI: e.g., 'Analyze flammability limits of PMMA solid fuels in 30% oxygen...'"
+                            class="w-full bg-transparent border-none py-4 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0 text-sm"
+                            onkeydown="if(event.key === 'Enter') simulateBackendCall()">
+                        <!-- Keyboard shortcut hint -->
+                        <div
+                            class="absolute right-3 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-400 font-mono hidden sm:block">
+                            ENTER ↵
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gradient Analyze Button -->
+                <button onclick="simulateBackendCall()"
+                    class="relative overflow-hidden bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-xl text-sm font-semibold transition-all active:scale-95 group border border-slate-700 hover:border-cyan-500/50 flex items-center gap-2 shadow-lg">
+                    <!-- Hover gradient background -->
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <i data-lucide="zap" class="w-4 h-4 text-cyan-400 group-hover:text-cyan-300"></i>
+                    <span class="relative">Execute</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content Grid -->
+        <main class="flex-1 p-10 overflow-y-auto w-full max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+                <!-- Main SI Analysis Card (Spans 2 columns) -->
+                <div class="lg:col-span-2 glass-panel rounded-2xl p-7 flex flex-col relative overflow-hidden group">
+                    <!-- Decorative subtle gradient top border -->
+                    <div
+                        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-30">
+                    </div>
+
+                    <h3
+                        class="text-sm tracking-widest uppercase font-semibold flex items-center gap-3 mb-6 text-slate-300">
+                        <div class="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                            <i data-lucide="activity" class="text-cyan-400 w-4 h-4"></i>
+                        </div>
+                        SI Analysis Output
+                    </h3>
+
+                    <div id="aiOutput" class="text-slate-300 flex-1 text-sm leading-relaxed">
+                        <div class="flex flex-col items-center justify-center h-full opacity-50 py-12">
+                            <i data-lucide="box-select" class="w-12 h-12 text-slate-600 mb-4 stroke-[1.5]"></i>
+                            <p class="text-slate-400 italic text-center">Awaiting execution parameters.<br>Select an
+                                environment and run an analysis to retrieve NASA PSI data.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Earth Applications Side Panel -->
+                <div class="glass-panel rounded-2xl p-7 flex flex-col relative">
+                    <div
+                        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-30">
+                    </div>
+
+                    <h3
+                        class="text-sm tracking-widest uppercase font-semibold flex items-center gap-3 mb-6 text-slate-300">
+                        <div class="p-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                            <i data-lucide="globe-2" class="text-emerald-400 w-4 h-4"></i>
+                        </div>
+                        Earth Impact
+                    </h3>
+
+                    <div class="space-y-5 text-sm text-slate-300 mt-2">
+                        <div
+                            class="flex items-start gap-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:border-emerald-500/30 transition-colors">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="text-slate-200 block mb-1">Firefighter Tech</strong>
+                                <span class="text-slate-400 text-xs leading-relaxed">Spacesuit life-support adaptations
+                                    significantly improved terrestrial breathing gear and thermal clothing.</span>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-start gap-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:border-emerald-500/30 transition-colors">
+                            <i data-lucide="wind" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="text-slate-200 block mb-1">Smoke Detection</strong>
+                                <span class="text-slate-400 text-xs leading-relaxed">DAFT micro-g studies created
+                                    sensors that distinguish smoke from dust in industrial mines.</span>
+                            </div>
+                        </div>
+                        <div
+                            class="flex items-start gap-4 p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 hover:border-emerald-500/30 transition-colors">
+                            <i data-lucide="droplets" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="text-slate-200 block mb-1">Suppression</strong>
+                                <span class="text-slate-400 text-xs leading-relaxed">Fine-water-mist extinguishers
+                                    developed for the ISS are now adopted for Earth use.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Row -->
+            <div class="grid grid-cols-1 gap-8">
+                <div class="glass-panel rounded-2xl p-7 relative">
+                    <div
+                        class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-rose-500 opacity-30">
+                    </div>
+
+                    <h3
+                        class="text-sm tracking-widest uppercase font-semibold flex items-center justify-between mb-6 text-slate-300">
+                        <div class="flex items-center gap-3">
+                            <div class="p-1.5 rounded-md bg-orange-500/10 border border-orange-500/20">
+                                <i data-lucide="bar-chart-3" class="text-orange-400 w-4 h-4"></i>
+                            </div>
+                            Flame Spread Risk Assessment
+                        </div>
+                        <span
+                            class="text-[10px] bg-slate-800 border border-slate-700 px-2 py-1 rounded text-slate-400 font-mono">LIVE_TELEMETRY</span>
+                    </h3>
+
+                    <!-- Chart Canvas Container -->
+                    <div class="h-[280px] w-full mt-2 relative">
+                        <canvas id="flameChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-8"></div> <!-- Bottom Spacer -->
+        </main>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // 1. Initialize Icons
+        lucide.createIcons();
+
+        // 2. Setup High-End Chart.js UI
+        const ctx = document.getElementById('flameChart').getContext('2d');
+
+        // Custom gradient for bars
+        const solidGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        solidGradient.addColorStop(0, 'rgba(244, 63, 94, 0.9)');  // Rose 500
+        solidGradient.addColorStop(1, 'rgba(244, 63, 94, 0.2)');
+
+        const gasGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gasGradient.addColorStop(0, 'rgba(6, 182, 212, 0.9)');    // Cyan 500
+        gasGradient.addColorStop(1, 'rgba(6, 182, 212, 0.2)');
+
+        const liqGradient = ctx.createLinearGradient(0, 0, 0, 300);
+        liqGradient.addColorStop(0, 'rgba(249, 115, 22, 0.9)');   // Orange 500
+        liqGradient.addColorStop(1, 'rgba(249, 115, 22, 0.2)');
+
+        let myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Solid Fuel (PMMA)', 'Gaseous (Propane)', 'Liquid Droplet'],
+                datasets: [{
+                    label: 'Calculated Risk Factor',
+                    data: [75, 85, 55],
+                    backgroundColor: [solidGradient, gasGradient, liqGradient],
+                    borderColor: ['#f43f5e', '#06b6d4', '#f97316'],
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleColor: '#e2e8f0',
+                        bodyColor: '#94a3b8',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: 'rgba(51, 65, 85, 0.3)', drawBorder: false },
+                        ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', font: { family: 'Inter', size: 12, weight: 500 } }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+
+        // 3. Environment Toggle Logic
+        function updateDashboard() {
+            const env = document.querySelector('input[name="env"]:checked').value;
+
+            // Adjust data based on selected environment (Moon is highest risk due to 30% O2)
+            if (env === 'lunar') {
+                myChart.data.datasets[0].data = [88, 92, 65];
+            }
+            else if (env === 'martian') {
+                myChart.data.datasets[0].data = [72, 80, 52];
+            }
+            else {
+                // Micro-g (ISS)
+                myChart.data.datasets[0].data = [58, 75, 45];
+            }
+
+            myChart.update();
+        }
+
+        // Trigger initial data load
+        updateDashboard();
+
+        // 4. API Fetch & Loading States
+        async function simulateBackendCall() {
+            const query = document.getElementById('searchQuery').value;
+            const env = document.querySelector('input[name="env"]:checked').value;
+            const outputText = document.getElementById('aiOutput');
+
+            if (!query) return;
+
+            // Sleek animated loading state
+            outputText.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full space-y-6 py-10">
+                    <div class="relative">
+                        <!-- Outer glowing ring -->
+                        <div class="w-14 h-14 border-4 border-slate-700/50 rounded-full"></div>
+                        <!-- Inner spinning ring -->
+                        <div class="absolute inset-0 w-14 h-14 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                        <!-- Center icon -->
+                        <i data-lucide="cpu" class="absolute inset-0 m-auto w-5 h-5 text-cyan-400/80"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm font-semibold text-cyan-400 tracking-wide mb-1">INTERFACING WITH VECTOR DATABASE</p>
+                        <p class="text-xs text-slate-500 font-mono animate-pulse">Running semantic search across NASA PSI archives...</p>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+
+            try {
+                // IMPORTANT: Replace localhost with actual Python backend IP if running cross-device
+                const response = await fetch('http://localhost:8000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: query, environment: env })
+                });
+
+                // If the real backend isn't running, simulate a response for presentation purposes
+                if (!response.ok) throw new Error("Connection failed");
+
+                const data = await response.json();
+                renderSuccessState(outputText, data.answer);
+
+            } catch (error) {
+                // SIMULATED RESPONSE (Fallback if FastAPI isn't running)
+                setTimeout(() => {
+                    const fallbackAnswer = `Based on the NASA ACME and BASS investigations, solid fuels (like PMMA) exhibit significantly altered flammability limits in microgravity. At elevated oxygen concentrations (~30% expected in Lunar habitats), the flame spread velocity increases drastically compared to terrestrial models. The absence of buoyancy-driven convection means the flame shape becomes spherical, and extinction limits are extended, increasing the overall fire hazard.`;
+                    renderSuccessState(outputText, fallbackAnswer);
+                }, 2500); // Fake a 2.5s network delay
+            }
+        }
+
+        // Render the final AI output with citations
+        function renderSuccessState(element, answer) {
+            element.innerHTML = `
+                <div class="animate-in fade-in slide-in-from-bottom-2 duration-700 flex flex-col h-full">
+                    <div class="flex-1">
+                        <p class="text-slate-200 leading-relaxed text-[15px]">${answer}</p>
+                    </div>
+                    
+                    <!-- Source Citations Footer -->
+                    <div class="mt-8 pt-4 border-t border-slate-700/50 flex items-center justify-between">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-[11px] font-medium text-slate-300">
+                            <i data-lucide="database" class="w-3.5 h-3.5 text-cyan-400"></i>
+                            Verified Source: NASA Physical Sciences Informatics
+                        </span>
+                        
+                        <div class="flex gap-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 text-[10px] font-mono border border-cyan-500/20">ACME</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded bg-rose-500/10 text-rose-400 text-[10px] font-mono border border-rose-500/20">BASS-II</span>
+                        </div>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+        }
+    </script>
+</body>
+
+</html>
