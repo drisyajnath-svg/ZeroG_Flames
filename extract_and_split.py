@@ -1,7 +1,9 @@
 from pathlib import Path
 from PyPDF2 import PdfReader
 import chromadb
+import chromadb
 
+# In newer LangChain versions, text splitters are in langchain_text_splitters
 # In newer LangChain versions, text splitters are in langchain_text_splitters
 try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -45,6 +47,29 @@ def main():
     chunks = text_splitter.split_text(giant_text)
     print(f"Total chunks created: {len(chunks)}\n")
 
+    # ==========================================
+    # NEW CODE: SAVE TO VECTOR DATABASE
+    # ==========================================
+    print("Connecting to Vector Database...")
+    chroma_client = chromadb.PersistentClient(path="./nasa_vectordb")
+    
+    # CRITICAL: Make sure "nasa_psi_data" is the exact same collection name your backend uses!
+    collection = chroma_client.get_or_create_collection(name="nasa_psi_data") 
+
+    # Extract just the filename (e.g., "ICES 2021-266 0503-2021 final") to use as a unique ID
+    pdf_name = Path(pdf_file_path).stem 
+    
+    metadatas = [{"source": pdf_name, "chunk_index": i} for i in range(len(chunks))]
+    ids = [f"{pdf_name}_chunk_{i}" for i in range(len(chunks))]
+
+    # Add the chunks to the database
+    collection.add(
+        documents=chunks,
+        metadatas=metadatas,
+        ids=ids
+    )
+    
+    print(f"SUCCESS: Added {len(chunks)} chunks from '{pdf_name}' to the database!")
     # ==========================================
     # NEW CODE: SAVE TO VECTOR DATABASE
     # ==========================================
