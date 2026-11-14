@@ -8,9 +8,10 @@ from chromadb.utils import embedding_functions
 import google.generativeai as genai
 
 # 1. Configure Gemini API (Paste your key here)
-GEMINI_API_KEY="AQ.Ab8RN6J_AhTgfJTEkr97pIM2_g9HQ8cufOiSkWGC3iSlQdTIsQ"
+GEMINI_API_KEY="AQ.Ab8RN6INmQFJAx9RLXiYCBhUmG69he0KnGCMEa6mNfW06hmxvA"
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")
+# Using gemini-3.5-flash-lite (gemini-3.8-flash exceeded free tier 20 req/day quota)
+model = genai.GenerativeModel("gemini-3.5-flash-lite")
 
 # 2. Initialize FastAPI + CORS for Drisya's Frontend
 app = FastAPI(title="ZeroG Flames Fire Safety API")
@@ -77,7 +78,7 @@ USER QUERY: {query}
 """
 
 @app.post("/ask_dashboard")
-async def ask_dashboard(request: QueryRequest):
+def ask_dashboard(request: QueryRequest):
     try:
         # Step A: Retrieve top 4 relevant chunks from ChromaDB
         search_query = f"{request.environment} {request.query}"
@@ -95,8 +96,15 @@ async def ask_dashboard(request: QueryRequest):
             environment=request.environment,
             query=request.query
         )
-        response = model.generate_content(prompt)
+        print("--- [DEBUG] 1. Sending request to Gemini... ---")
+        try:
+            response = model.generate_content(prompt)
+        except Exception as api_err:
+            print(f"Warning: Primary model failed ({api_err}), trying fallback model...")
+            fallback_model = genai.GenerativeModel("gemini-3.1-flash-lite")
+            response = fallback_model.generate_content(prompt)
         raw_text = response.text.strip()
+        print("--- [DEBUG] 2. Received response from Gemini! ---")
 
         # Step C: Split real-time log and JSON payload
         if "</PROCESSING_LOG>" in raw_text:
@@ -109,7 +117,12 @@ async def ask_dashboard(request: QueryRequest):
 
         # Clean accidental markdown fences if Gemini adds them
         if json_part.startswith("```"):
-            json_part = json_part.strip("`").replace("json\n", "", 1).strip()
+            lines = json_part.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            json_part = "\n".join(lines).strip()
 
         parsed_data = json.loads(json_part)
 

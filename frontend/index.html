@@ -429,11 +429,8 @@
             outputText.innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full space-y-6 py-10">
                     <div class="relative">
-                        <!-- Outer glowing ring -->
                         <div class="w-14 h-14 border-4 border-slate-700/50 rounded-full"></div>
-                        <!-- Inner spinning ring -->
                         <div class="absolute inset-0 w-14 h-14 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                        <!-- Center icon -->
                         <i data-lucide="cpu" class="absolute inset-0 m-auto w-5 h-5 text-cyan-400/80"></i>
                     </div>
                     <div class="text-center">
@@ -444,25 +441,30 @@
             lucide.createIcons();
 
             try {
-                // IMPORTANT: Replace localhost with actual Python backend IP if running cross-device
-                const response = await fetch('http://localhost:8000/ask', {
+                // Connect to your real FastAPI backend
+                const response = await fetch('http://127.0.0.1:8000/ask_dashboard', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: query, environment: env })
+                    body: JSON.stringify({ query: query, environment: env })
                 });
 
-                // If the real backend isn't running, simulate a response for presentation purposes
-                if (!response.ok) throw new Error("Connection failed");
+                if (!response.ok) throw new Error("Backend returned an error. Check FastAPI terminal.");
 
-                const data = await response.json();
-                renderSuccessState(outputText, data.answer);
+                const jsonResponse = await response.json();
+
+                // Extract the summary from your FastAPI JSON
+                // Using a fallback check depending on how your Python dictionary is structured
+                const finalAnswer = jsonResponse.summary || jsonResponse.data?.summary || JSON.stringify(jsonResponse);
+
+                renderSuccessState(outputText, finalAnswer);
 
             } catch (error) {
-                // SIMULATED RESPONSE (Fallback if FastAPI isn't running)
-                setTimeout(() => {
-                    const fallbackAnswer = `Based on the NASA ACME and BASS investigations, solid fuels (like PMMA) exhibit significantly altered flammability limits in microgravity. At elevated oxygen concentrations (~30% expected in Lunar habitats), the flame spread velocity increases drastically compared to terrestrial models. The absence of buoyancy-driven convection means the flame shape becomes spherical, and extinction limits are extended, increasing the overall fire hazard.`;
-                    renderSuccessState(outputText, fallbackAnswer);
-                }, 2500); // Fake a 2.5s network delay
+                // If it fails, show the REAL error on the screen, not the fake presentation text
+                outputText.innerHTML = `
+                    <div class="text-rose-500 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                        <strong>Connection Error:</strong> ${error.message} <br>
+                        Make sure FastAPI is running on 127.0.0.1:8000 and CORS is configured.
+                    </div>`;
             }
         }
 
