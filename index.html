@@ -108,75 +108,65 @@
         </div>
     </aside>
 
-    <!-- Main Workspace -->
-    <div class="flex-1 flex flex-col h-full">
+    <!-- Dashboard Widgets -->
+    <main class="flex-1 p-8 overflow-y-auto">
 
-        <!-- Header -->
-        <header class="h-16 bg-ide-surface border-b border-ide-border flex items-center px-6 justify-between shrink-0">
-            <div class="relative w-full max-w-xl flex items-center">
-                <i data-lucide="terminal" class="absolute left-3 w-4 h-4 text-gray-500"></i>
-                <input type="text" id="searchQuery" placeholder="Enter query (e.g. 'flammability risk PMMA')..."
-                    class="w-full bg-[#1e2227] border border-ide-border rounded py-2 pl-9 pr-24 text-sm text-gray-200 focus:outline-none focus:border-ide-blue transition-none"
-                    onkeydown="if(event.key === 'Enter') simulateBackendCall()">
-                <button onclick="simulateBackendCall()"
-                    class="absolute right-1 top-1 bottom-1 bg-[#3e4451] hover:bg-[#4b5363] text-gray-200 px-4 rounded text-xs font-medium border border-[#5c6370] transition-none">
-                    Run Analysis
-                </button>
-            </div>
-        </header>
+        <!-- Top Row: AI Analysis & Earth Applications -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-        <!-- Dashboard Content Grid -->
-        <main class="flex-1 p-6 overflow-y-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full min-h-[500px]">
-
-                <!-- Box 1: Output & Debug (Looks slightly messy on purpose) -->
-                <div class="bg-ide-surface rounded-md shadow border border-ide-border flex flex-col overflow-hidden">
-                    <div class="px-4 py-3 border-b border-ide-border bg-[#21252b] flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-gray-300 flex items-center gap-2">
-                            <i data-lucide="cpu" class="w-4 h-4 text-ide-blue"></i>
-                            SI Engine Output
-                        </h3>
-                    </div>
-
-                    <div class="p-4 flex-1 overflow-y-auto flex flex-col gap-4">
-                        <!-- Formatted Text Area -->
-                        <div id="aiOutput" class="text-sm leading-relaxed text-ide-text">
-                            <!-- Content injected via JS -->
-                        </div>
-
-                        <!-- Raw JSON dump (Imperfection/Developer feel) -->
-                        <div class="mt-auto pt-4 border-t border-ide-border border-dashed">
-                            <p class="text-xs text-gray-500 mb-2 font-mono flex items-center gap-1">
-                                <i data-lucide="braces" class="w-3 h-3"></i> raw_context.json
-                            </p>
-                            <pre id="debugOutput"
-                                class="bg-[#1e2227] p-3 rounded text-[11px] font-mono text-ide-green overflow-x-auto border border-[#2c313a]">
-// waiting for input...</pre>
-                        </div>
-                    </div>
+            <!-- AI Summary Output (Spans 2 columns) -->
+            <div class="lg:col-span-2 bg-slate-800 rounded-xl p-6 border border-slate-700 flex flex-col">
+                <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
+                    <i data-lucide="shield-alert" class="text-yellow-500 w-5 h-5"></i>
+                    SI Analysis & Summary
+                </h3>
+                <div id="aiOutput" class="text-slate-300 flex-1">
+                    <p class="text-slate-400 italic">Select an environment or run an analysis to view NASA PSI data
+                        insights.</p>
                 </div>
-
-                <!-- Box 2: Flammability Chart -->
-                <div class="bg-ide-surface rounded-md shadow border border-ide-border flex flex-col overflow-hidden">
-                    <div class="px-4 py-3 border-b border-ide-border bg-[#21252b] flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-gray-300 flex items-center gap-2">
-                            <i data-lucide="bar-chart-2" class="w-4 h-4 text-ide-orange"></i>
-                            Flame Spread Risk (Normalized)
-                        </h3>
-                        <!-- Human imperfection note -->
-                        <span
-                            class="text-[10px] bg-yellow-900/30 text-yellow-500 px-1 border border-yellow-700/50">TODO:
-                            fix responsive scale</span>
-                    </div>
-                    <div class="flex-1 p-4 relative w-full h-[300px]">
-                        <canvas id="flameChart"></canvas>
-                    </div>
-                </div>
-
             </div>
-        </main>
+
+            <!-- Earth Applications Side Panel (Spans 1 column) -->
+            <div class="bg-emerald-900/20 rounded-xl p-6 border border-emerald-800/50">
+                <h3 class="text-lg font-semibold text-emerald-400 flex items-center gap-2 mb-4">
+                    <i data-lucide="globe" class="w-5 h-5"></i>
+                    Terrestrial Applications
+                </h3>
+                <ul class="space-y-3 text-sm text-slate-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Firefighter Tech:</strong> 1970s spacesuit adaptations improved breathing gear and
+                            1980s tech enhanced protective clothing.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Smoke Detection:</strong> Instruments from DAFT studies distinguish smoke from
+                            dust, reducing nuisance alarms in industrial mines.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Suppression:</strong> Fine-water-mist extinguishers developed for the ISS have
+                            practical applications on Earth.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Chart -->
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Flammability Chart -->
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
+                    <i data-lucide="rocket" class="text-blue-400 w-5 h-5"></i>
+                    Flame Spread Rate vs O2 Limit
+                </h3>
+                <div class="h-[250px] w-full flex items-center justify-center bg-slate-900 rounded-lg p-2">
+                    <canvas id="flameChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
     </div>
-
     <!-- JavaScript Logic -->
     <script>
         // Initialize Icons
@@ -276,30 +266,60 @@
         updateDashboard();
 
         // Simulate AI Backend Call triggered by Search Button
-        function simulateBackendCall() {
-            const query = document.getElementById('searchQuery').value.trim();
+        async function simulateBackendCall() {
+            const query = document.getElementById('searchQuery').value;
+            const env = document.querySelector('input[name="env"]:checked').value;
+            const outputText = document.getElementById('aiOutput');
+
             if (!query) return;
 
-            const outputArea = document.getElementById('aiOutput');
-            const debugArea = document.getElementById('debugOutput');
+            // 1. The Sleek Loading State
+            outputText.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full space-y-4 py-8">
+                    <div class="w-8 h-8 border-4 border-slate-600 border-t-red-500 rounded-full animate-spin"></div>
+                    <p class="text-sm font-medium text-slate-400 animate-pulse">Querying NASA PSI Database & Generating AI Insights...</p>
+                </div>
+            `;
 
-            // Raw text loading state
-            outputArea.innerHTML = `<p class="text-ide-orange font-mono text-xs">> Fetching embeddings for query...</p>`;
-            debugArea.textContent = `{\n  "request": "${query}",\n  "status": "pending_vector_search"\n}`;
+            try {
+                // Change localhost to your teammate's local IP address when you are ready to connect
+                const response = await fetch('http://localhost:8000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: query, environment: env })
+                });
 
-            // Mock delay
-            setTimeout(() => {
-                outputArea.innerHTML = `
-                    <p class="mb-2 text-ide-green font-mono text-xs">> Query successful.</p>
-                    <p class="mb-3 text-sm">Based on <strong>ACME</strong> datasets, forced-flow velocity non-linearly affects solid fuels in 30% O2.</p>
-                    <ul class="list-disc pl-5 space-y-1 text-gray-400 text-sm">
-                        <li><span class="text-gray-200">Low Velocity:</span> Accelerates flame spread (feeds O2).</li>
-                        <li><span class="text-gray-200">High Velocity:</span> Induces thermal blow-off (quenches).</li>
-                    </ul>
+                if (!response.ok) throw new Error("Backend server not responding.");
+
+                const data = await response.json();
+
+                // 2. The Success State with the Source Badge
+                outputText.innerHTML = `
+                    <p class="text-white leading-relaxed mb-4">${data.answer}</p>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-600 text-xs font-medium text-slate-300">
+                            <i data-lucide="database" class="w-3 h-3 text-blue-400"></i>
+                            Source: NASA Physical Sciences Informatics (PSI)
+                        </span>
+                    </div>
                 `;
+                // Re-initialize the new database icon
+                lucide.createIcons();
 
-                debugArea.textContent = `{\n  "query": "${query}",\n  "matches": ["ACME_doc_34", "BASS_doc_12"],\n  "confidence_score": 0.92,\n  "execution_time_ms": 1403\n}`;
-            }, 1200);
+            } catch (error) {
+                // 3. The Graceful Error State
+                outputText.innerHTML = `
+                    <div class="flex items-start gap-3 p-4 bg-red-900/20 border border-red-800/50 rounded-lg">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-red-400 mb-1">Connection to SI Core Lost</p>
+                            <p class="text-sm text-slate-400">${error.message}. Ensure the FastAPI backend is running.</p>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
         }
     </script>
 </body>
