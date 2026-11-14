@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroG Flames - Dev Build</title>
+
+    <!-- Standard Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js & Lucide Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        // Utilitarian IDE-like color palette
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ide: {
+                            bg: '#1c1e22',
+                            surface: '#282c34',
+                            border: '#3e4451',
+                            text: '#abb2bf',
+                            blue: '#61afef',
+                            orange: '#d19a66',
+                            red: '#e06c75',
+                            green: '#98c379'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Quick utilitarian scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1c1e22;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3e4451;
+            border-radius: 4px;
+        }
+
+        /* Reset radio buttons to look standard but usable */
+        input[type="radio"] {
+            width: 1rem;
+            height: 1rem;
+            accent-color: #61afef;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-ide-bg text-ide-text flex h-screen overflow-hidden font-sans">
+
+    <!-- Sidebar (Basic structure, no crazy shadows) -->
+    <aside class="w-64 bg-ide-surface z-20 flex flex-col shrink-0 border-r border-ide-border">
+
+        <!-- Logo Area with imperfection (skewed beta tag) -->
+        <div class="h-16 flex items-center px-4 border-b border-ide-border relative">
+            <i data-lucide="flame" class="w-5 h-5 text-ide-orange mr-2"></i>
+            <h1 class="text-base font-bold text-gray-200">ZeroG Flames</h1>
+            <!-- Imperfect beta badge -->
+            <span
+                class="absolute top-3 right-4 bg-ide-red text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm transform -rotate-3 border border-red-800">
+                BETA v0.9
+            </span>
+        </div>
+
+        <!-- Navigation / Filters -->
+        <div class="p-4 flex-1 flex flex-col">
+            <h2 class="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Target Environment</h2>
+
+            <div class="space-y-2">
+                <!-- Standard radio buttons, no fancy CSS tricks -->
+                <label
+                    class="flex items-center space-x-3 p-2 hover:bg-[#2c313a] rounded cursor-pointer border border-transparent">
+                    <input type="radio" name="env" value="lunar" checked onchange="updateDashboard()">
+                    <span class="text-sm">Lunar Base (1/6g)</span>
+                </label>
+
+                <label
+                    class="flex items-center space-x-3 p-2 hover:bg-[#2c313a] rounded cursor-pointer border border-transparent">
+                    <input type="radio" name="env" value="martian" onchange="updateDashboard()">
+                    <span class="text-sm">Martian Base (3/8g)</span>
+                </label>
+
+                <label
+                    class="flex items-center space-x-3 p-2 hover:bg-[#2c313a] rounded cursor-pointer border border-transparent">
+                    <input type="radio" name="env" value="micro" onchange="updateDashboard()">
+                    <span class="text-sm">Space Station (0g)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-ide-border">
+            <!-- Fake dev note -->
+            <p class="text-[11px] text-gray-500 font-mono">Status: Connected to local DB</p>
+        </div>
+    </aside>
+
+    <!-- Dashboard Widgets -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+        <!-- Top Row: AI Analysis & Earth Applications -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+            <!-- AI Summary Output (Spans 2 columns) -->
+            <div class="lg:col-span-2 bg-slate-800 rounded-xl p-6 border border-slate-700 flex flex-col">
+                <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
+                    <i data-lucide="shield-alert" class="text-yellow-500 w-5 h-5"></i>
+                    SI Analysis & Summary
+                </h3>
+                <div id="aiOutput" class="text-slate-300 flex-1">
+                    <p class="text-slate-400 italic">Select an environment or run an analysis to view NASA PSI data
+                        insights.</p>
+                </div>
+            </div>
+
+            <!-- Earth Applications Side Panel (Spans 1 column) -->
+            <div class="bg-emerald-900/20 rounded-xl p-6 border border-emerald-800/50">
+                <h3 class="text-lg font-semibold text-emerald-400 flex items-center gap-2 mb-4">
+                    <i data-lucide="globe" class="w-5 h-5"></i>
+                    Terrestrial Applications
+                </h3>
+                <ul class="space-y-3 text-sm text-slate-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Firefighter Tech:</strong> 1970s spacesuit adaptations improved breathing gear and
+                            1980s tech enhanced protective clothing.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Smoke Detection:</strong> Instruments from DAFT studies distinguish smoke from
+                            dust, reducing nuisance alarms in industrial mines.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-emerald-500 mt-0.5">•</span>
+                        <span><strong>Suppression:</strong> Fine-water-mist extinguishers developed for the ISS have
+                            practical applications on Earth.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Chart -->
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Flammability Chart -->
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <h3 class="text-lg font-semibold flex items-center gap-2 mb-4">
+                    <i data-lucide="rocket" class="text-blue-400 w-5 h-5"></i>
+                    Flame Spread Rate vs O2 Limit
+                </h3>
+                <div class="h-[250px] w-full flex items-center justify-center bg-slate-900 rounded-lg p-2">
+                    <canvas id="flameChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+    </div>
+    <!-- JavaScript Logic -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Data for different environments (Utilitarian content)
+        const dashboardData = {
+            lunar: {
+                chartData: [85, 92, 60],
+                html: `
+                    <p class="mb-3"><strong class="text-gray-200">Env:</strong> Lunar Base (1/6g) | <strong class="text-gray-200">O2:</strong> 30% @ 10.2psi</p>
+                    <p class="mb-2">Elevated risk profile detected. Higher oxygen concentration makes materials significantly more flammable compared to Earth normal.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-400">
+                        <li>Buoyancy plays a minor role.</li>
+                        <li>Flames are taller and wider.</li>
+                    </ul>
+                `,
+                rawJson: `{\n  "status": 200,\n  "gravity": 0.166,\n  "o2_pct": 30,\n  "risk_flags": ["elevated_o2", "low_buoyancy"]\n}`
+            },
+            martian: {
+                chartData: [75, 88, 55],
+                html: `
+                    <p class="mb-3"><strong class="text-gray-200">Env:</strong> Martian Base (3/8g) | <strong class="text-gray-200">O2:</strong> Variable</p>
+                    <p class="mb-2">Moderate risk profile approaching terrestrial dynamics. Convective flows are stronger here than on the Moon.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-400">
+                        <li>Standard DAFT smoke sensors are highly effective here.</li>
+                        <li>Flame spread rates approach terrestrial models.</li>
+                    </ul>
+                `,
+                rawJson: `{\n  "status": 200,\n  "gravity": 0.375,\n  "o2_pct": 21,\n  "risk_flags": ["terrestrial_mimic"]\n}`
+            },
+            micro: {
+                chartData: [60, 80, 45],
+                html: `
+                    <p class="mb-3"><strong class="text-gray-200">Env:</strong> ISS (Micro-g) | <strong class="text-gray-200">O2:</strong> 21% - 100%</p>
+                    <p class="mb-2">Flames burn spherical and soot-free. Flammability limits are fundamentally altered without buoyancy-driven convection.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-400">
+                        <li>Spacesuit prep (100% O2) is the primary hazard.</li>
+                        <li>Highly dependent on forced ventilation velocities.</li>
+                    </ul>
+                `,
+                rawJson: `{\n  "status": 200,\n  "gravity": 0.0,\n  "o2_pct": [21, 100],\n  "risk_flags": ["spherical_flame", "ventilation_dependent"]\n}`
+            }
+        };
+
+        // Initialize Chart.js with muted colors
+        Chart.defaults.color = '#7f848e';
+        Chart.defaults.font.family = 'ui-sans-serif, system-ui, sans-serif';
+
+        const ctx = document.getElementById('flameChart').getContext('2d');
+
+        let riskChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Solid (PMMA)', 'Gas (Propane)', 'Liquid'],
+                datasets: [{
+                    label: 'Risk Score',
+                    data: dashboardData.lunar.chartData,
+                    // Muted utilitarian colors
+                    backgroundColor: ['#e06c75', '#61afef', '#98c379'],
+                    borderWidth: 1,
+                    borderColor: '#282c34',
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#3e4451' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                },
+                animation: { duration: 0 } // Disabled animation for that raw/instant feel
+            }
+        });
+
+        // Function triggered by Radio Buttons
+        function updateDashboard() {
+            const envKey = document.querySelector('input[name="env"]:checked').value;
+            const data = dashboardData[envKey];
+
+            document.getElementById('aiOutput').innerHTML = data.html;
+            document.getElementById('debugOutput').textContent = data.rawJson;
+
+            riskChart.data.datasets[0].data = data.chartData;
+            riskChart.update();
+        }
+
+        // Initialize default view
+        updateDashboard();
+
+        // Simulate AI Backend Call triggered by Search Button
+        async function simulateBackendCall() {
+            const query = document.getElementById('searchQuery').value;
+            const env = document.querySelector('input[name="env"]:checked').value;
+            const outputText = document.getElementById('aiOutput');
+
+            if (!query) return;
+
+            // 1. The Sleek Loading State
+            outputText.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full space-y-4 py-8">
+                    <div class="w-8 h-8 border-4 border-slate-600 border-t-red-500 rounded-full animate-spin"></div>
+                    <p class="text-sm font-medium text-slate-400 animate-pulse">Querying NASA PSI Database & Generating AI Insights...</p>
+                </div>
+            `;
+
+            try {
+                // Change localhost to your teammate's local IP address when you are ready to connect
+                const response = await fetch('http://localhost:8000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: query, environment: env })
+                });
+
+                if (!response.ok) throw new Error("Backend server not responding.");
+
+                const data = await response.json();
+
+                // 2. The Success State with the Source Badge
+                outputText.innerHTML = `
+                    <p class="text-white leading-relaxed mb-4">${data.answer}</p>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-600 text-xs font-medium text-slate-300">
+                            <i data-lucide="database" class="w-3 h-3 text-blue-400"></i>
+                            Source: NASA Physical Sciences Informatics (PSI)
+                        </span>
+                    </div>
+                `;
+                // Re-initialize the new database icon
+                lucide.createIcons();
+
+            } catch (error) {
+                // 3. The Graceful Error State
+                outputText.innerHTML = `
+                    <div class="flex items-start gap-3 p-4 bg-red-900/20 border border-red-800/50 rounded-lg">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="font-medium text-red-400 mb-1">Connection to SI Core Lost</p>
+                            <p class="text-sm text-slate-400">${error.message}. Ensure the FastAPI backend is running.</p>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        }
+    </script>
+</body>
+
+</html>
