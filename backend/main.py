@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,40 +8,39 @@ import chromadb
 from chromadb.utils import embedding_functions
 import google.generativeai as genai
 
-# 1. Configure Gemini API (Paste your key here)
-GEMINI_API_KEY="AQ.Ab8RN6INmQFJAx9RLXiYCBhUmG69he0KnGCMEa6mNfW06hmxvA"
+# Gemini API configuration
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6Lkt4iC_dWhQoLf-GjokFOq6wH_looQtSdKHw9Cfw8VcA")
 genai.configure(api_key=GEMINI_API_KEY)
-# Using gemini-3.5-flash-lite (gemini-3.8-flash exceeded free tier 20 req/day quota)
 model = genai.GenerativeModel("gemini-3.5-flash-lite")
 
-# 2. Initialize FastAPI + CORS for Drisya's Frontend
+# FastAPI setup with permissive CORS for local client dashboard
 app = FastAPI(title="ZeroG Flames Fire Safety API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=False,  # <-- Change this to False
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# 3. Connect to your existing Vector DB
-DB_PATH = r"D:\NASA\ZeroG_Flames\nasa_vectordb"
+# Dynamically resolve vector database path relative to project root
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = str(BASE_DIR / "nasa_vectordb")
 
 sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"
 )
 chroma_client = chromadb.PersistentClient(path=DB_PATH)
-collection = chroma_client.get_collection(
+collection = chroma_client.get_or_create_collection(
     name="combustion_experiments",
     embedding_function=sentence_transformer_ef
 )
 
-# Request format expected from Drisya's frontend
+# Request payload schema for dashboard queries
 class QueryRequest(BaseModel):
     query: str
-    environment: str = "General"  # e.g., "ISS (0g)", "Moon (1/6g)", "Mars (3/8g)"
+    environment: str = "General"
 
 SYSTEM_PROMPT = """You are the backend AI Engine for a Spaceflight Fire Safety Dashboard, specializing in microgravity and partial-gravity combustion. Analyze raw text chunks retrieved from NASA's Physical Sciences Informatics (PSI) database and answer user queries.
 
@@ -80,7 +80,7 @@ USER QUERY: {query}
 @app.post("/ask_dashboard")
 def ask_dashboard(request: QueryRequest):
     try:
-        # Step A: Retrieve top 4 relevant chunks from ChromaDB
+        # Retrieve top 4 matching document chunks from vector index
         search_query = f"{request.environment} {request.query}"
         results = collection.query(
             query_texts=[search_query],
@@ -97,16 +97,19 @@ def ask_dashboard(request: QueryRequest):
             query=request.query
         )
         print("--- [DEBUG] 1. Sending request to Gemini... ---")
+        
+        # Call model with secondary fallback if rate limits or quota errors occur
         try:
             response = model.generate_content(prompt)
         except Exception as api_err:
             print(f"Warning: Primary model failed ({api_err}), trying fallback model...")
             fallback_model = genai.GenerativeModel("gemini-3.1-flash-lite")
             response = fallback_model.generate_content(prompt)
+        
         raw_text = response.text.strip()
         print("--- [DEBUG] 2. Received response from Gemini! ---")
 
-        # Step C: Split real-time log and JSON payload
+        # Separate internal reasoning logs from JSON payload
         if "</PROCESSING_LOG>" in raw_text:
             parts = raw_text.split("</PROCESSING_LOG>")
             log_part = parts[0].replace("<PROCESSING_LOG>", "").strip()

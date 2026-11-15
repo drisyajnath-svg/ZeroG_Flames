@@ -1,26 +1,26 @@
 from pathlib import Path
 from PyPDF2 import PdfReader
-import chromadb
-import chromadb
 
-# In newer LangChain versions, text splitters are in langchain_text_splitters
-# In newer LangChain versions, text splitters are in langchain_text_splitters
+# Backward compatibility across langchain package reorganizations
 try:
     from langchain.text_splitter import RecursiveCharacterTextSplitter
 except ImportError:
     from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 
 def extract_text_from_pdf(pdf_path: str | Path) -> str:
     """Extracts all text from a PDF file into a single string using PyPDF2."""
     reader = PdfReader(str(pdf_path))
     full_text = []
 
-    for i, page in enumerate(reader.pages):
+    for page in reader.pages:
         page_text = page.extract_text()
         if page_text:
             full_text.append(page_text)
 
+    # Join extracted pages with newline separators
     return "\n".join(full_text)
+
 
 def main():
     # Replace with the path to your target PDF file

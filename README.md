@@ -353,15 +353,32 @@ The persistent vector storage directory maintained by ChromaDB.
 Specifies all Python dependencies required to run the ingestion pipeline and backend server:
 
 ```text
-fastapi>=0.100.0
-uvicorn>=0.22.0
-pydantic>=2.0.0
-chromadb>=0.4.0
-sentence-transformers>=2.2.0
-google-generativeai>=0.3.0
+# Web API & Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+python-multipart>=0.0.9
+
+# Google Gemini Generative AI SDK
+google-generativeai>=0.4.0
+
+# Vector Database & Embeddings
+chromadb>=0.4.24
+sentence-transformers>=2.5.0
+torch>=2.0.0
+numpy>=1.24.0
+
+# Document Ingestion, PDF Parsing & Chunking
 PyPDF2>=3.0.0
-langchain>=0.1.0
+pypdf>=4.0.0
+langchain>=0.1.10
 langchain-text-splitters>=0.0.1
+langchain-community>=0.0.25
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+httpx>=0.27.0
 ```
 
 ---
