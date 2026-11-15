@@ -1,5 +1,6 @@
 from pathlib import Path
 from PyPDF2 import PdfReader
+import chromadb
 
 # Backward compatibility across langchain package reorganizations
 try:
@@ -24,7 +25,7 @@ def extract_text_from_pdf(pdf_path: str | Path) -> str:
 
 def main():
     # Replace with the path to your target PDF file
-    pdf_file_path = r"C:/Users/Drisya J Nath/Desktop/NASA Data/Detailed FLEX Results.pdf"
+    pdf_file_path = r"C:/Users/Drisya J Nath/Desktop/NASA Data/SAFFIRE-Spacecraft fire safety demonstration.pdf"
     if not Path(pdf_file_path).exists():
         print(f"File '{pdf_file_path}' not found. Please provide a valid PDF path.")
         return
