@@ -195,19 +195,19 @@
     <!-- Main Workspace -->
     <div class="flex-1 flex flex-col h-full relative z-10">
 
-        <!-- Premium Header / Search -->
-        <header class="h-24 border-b border-slate-800/50 flex items-center px-10 shrink-0 z-20">
-            <div class="w-full max-w-4xl mx-auto flex gap-4 items-center">
+        <!-- Premium Header / Search & API Key Configuration -->
+        <header class="py-5 border-b border-slate-800/50 flex flex-col justify-center px-10 shrink-0 z-20 bg-slate-950/30">
+            <div class="w-full max-w-5xl mx-auto flex flex-col md:flex-row gap-3 items-stretch md:items-center">
                 <!-- Glowing Search Input -->
                 <div class="relative flex-1 group">
                     <div
                         class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur opacity-50 group-hover:opacity-100 transition duration-500">
                     </div>
-                    <div class="relative flex items-center glass-input rounded-xl overflow-hidden">
+                    <div class="relative flex items-center glass-input rounded-xl overflow-hidden border border-slate-700/60 focus-within:border-cyan-500/70">
                         <i data-lucide="cpu" class="absolute left-4 text-cyan-500/70 w-5 h-5"></i>
                         <input type="text" id="searchQuery"
                             placeholder="Query the SI: e.g., 'Analyze flammability limits of PMMA solid fuels in 30% oxygen...'"
-                            class="w-full bg-transparent border-none py-4 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0 text-sm"
+                            class="w-full bg-transparent border-none py-3.5 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0 text-sm"
                             onkeydown="if(event.key === 'Enter') simulateBackendCall()">
                         <div
                             class="absolute right-3 px-2 py-1 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-400 font-mono hidden sm:block">
@@ -215,15 +215,51 @@
                     </div>
                 </div>
 
+                <!-- API Key Input Field -->
+                <div class="relative w-full md:w-64 lg:w-72 group" id="apiKeyContainer">
+                    <div id="apiKeyGlow"
+                        class="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-xl blur opacity-30 group-hover:opacity-75 transition duration-500">
+                    </div>
+                    <div id="apiKeyBox"
+                        class="relative flex items-center glass-input rounded-xl overflow-hidden border border-slate-700/60 focus-within:border-amber-500/80 transition-all">
+                        <i data-lucide="key" class="absolute left-3.5 text-slate-400 w-4 h-4 shrink-0"></i>
+                        <input type="password" id="apiKeyInput"
+                            placeholder="Enter API key"
+                            title="Enter API Key to run or override when limit is exceeded"
+                            class="w-full bg-transparent border-none py-3.5 pl-10 pr-9 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-0 text-xs font-mono"
+                            oninput="onApiKeyInput()"
+                            onkeydown="if(event.key === 'Enter') simulateBackendCall()">
+                        <button type="button" onclick="toggleApiKeyVisibility()"
+                            class="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors p-1"
+                            title="Show/Hide API Key">
+                            <i data-lucide="eye" id="apiKeyToggleIcon" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Gradient Analyze Button -->
                 <button onclick="simulateBackendCall()"
-                    class="relative overflow-hidden bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-xl text-sm font-semibold transition-all active:scale-95 group border border-slate-700 hover:border-cyan-500/50 flex items-center gap-2 shadow-lg">
+                    class="relative overflow-hidden bg-slate-800 hover:bg-slate-700 text-white px-7 py-3.5 rounded-xl text-sm font-semibold transition-all active:scale-95 group border border-slate-700 hover:border-cyan-500/50 flex items-center justify-center gap-2 shadow-lg shrink-0">
                     <div
                         class="absolute inset-0 bg-gradient-to-r from-cyan-600/20 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity">
                     </div>
                     <i data-lucide="zap" class="w-4 h-4 text-cyan-400 group-hover:text-cyan-300"></i>
                     <span class="relative">Execute</span>
                 </button>
+            </div>
+
+            <!-- API Key Quota / Limit Warning Notice (Hidden by default, shown when out of limit) -->
+            <div id="apiKeyNotice" class="w-full max-w-5xl mx-auto mt-2.5 hidden">
+                <div class="p-2.5 px-4 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-between text-xs text-amber-300 animate-in fade-in slide-in-from-top-1 duration-300">
+                    <div class="flex items-center gap-2.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                        <span id="apiKeyNoticeText">Current API key is out of limit. Please <strong>enter API key</strong> above to continue.</span>
+                    </div>
+                    <button onclick="focusApiKeyBox()"
+                        class="px-2.5 py-1 bg-amber-500/25 hover:bg-amber-500/40 border border-amber-500/50 rounded-lg text-amber-200 font-semibold text-[11px] ml-2 shrink-0 transition-colors">
+                        Enter API Key
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -450,11 +486,92 @@
         }
         updateDashboard();
 
-        // 5. API Fetch & Loading States
+        // 5. API Key Management & Helpers
+        function focusApiKeyBox() {
+            const input = document.getElementById('apiKeyInput');
+            const box = document.getElementById('apiKeyBox');
+            if (input) {
+                input.focus();
+                input.select();
+            }
+            if (box) {
+                box.classList.add('border-amber-500', 'ring-2', 'ring-amber-500/50');
+                setTimeout(() => {
+                    box.classList.remove('ring-2', 'ring-amber-500/50');
+                }, 3000);
+            }
+            showApiKeyNotice("Current API key is out of limit. Please <strong>enter API key</strong> above to continue.");
+        }
+
+        function showApiKeyNotice(msgHtml) {
+            const notice = document.getElementById('apiKeyNotice');
+            const noticeText = document.getElementById('apiKeyNoticeText');
+            if (noticeText && msgHtml) {
+                noticeText.innerHTML = msgHtml;
+            }
+            if (notice) {
+                notice.classList.remove('hidden');
+            }
+            const box = document.getElementById('apiKeyBox');
+            if (box) {
+                box.classList.add('border-amber-500/80');
+            }
+            initIcons();
+        }
+
+        function hideApiKeyNotice() {
+            const notice = document.getElementById('apiKeyNotice');
+            if (notice) {
+                notice.classList.add('hidden');
+            }
+            const box = document.getElementById('apiKeyBox');
+            if (box) {
+                box.classList.remove('border-amber-500/80');
+            }
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('apiKeyInput');
+            const icon = document.getElementById('apiKeyToggleIcon');
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                if (icon) icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                if (icon) icon.setAttribute('data-lucide', 'eye');
+            }
+            initIcons();
+        }
+
+        function onApiKeyInput() {
+            const input = document.getElementById('apiKeyInput');
+            if (!input) return;
+            const val = input.value.trim();
+            if (val) {
+                localStorage.setItem('zerog_api_key', val);
+                hideApiKeyNotice();
+            } else {
+                localStorage.removeItem('zerog_api_key');
+            }
+        }
+
+        // Restore saved API key on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('zerog_api_key');
+            if (savedKey) {
+                const input = document.getElementById('apiKeyInput');
+                if (input) input.value = savedKey;
+            }
+        });
+
+        // 6. API Fetch & Loading States
         async function simulateBackendCall() {
             const query = document.getElementById('searchQuery').value.trim();
             const checkedRadio = document.querySelector('input[name="env"]:checked');
             const env = checkedRadio ? checkedRadio.value : 'lunar';
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiKey = apiKeyInput ? apiKeyInput.value.trim() : '';
             const outputText = document.getElementById('aiOutput');
             const rankingContainer = document.getElementById('investigationsRanking');
 
@@ -487,10 +604,32 @@
                 const response = await fetch('http://127.0.0.1:8000/ask_dashboard', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: query, environment: envLabel })
+                    body: JSON.stringify({
+                        query: query,
+                        environment: envLabel,
+                        api_key: apiKey || null
+                    })
                 });
 
-                if (!response.ok) throw new Error("Backend returned an error. Check FastAPI terminal.");
+                if (!response.ok) {
+                    const errPayload = await response.json().catch(() => null);
+                    const errMsg = errPayload?.detail || `Server returned status ${response.status}`;
+                    const isLimitError = response.status === 429 ||
+                                         errMsg.toLowerCase().includes('quota') ||
+                                         errMsg.toLowerCase().includes('resourceexhausted') ||
+                                         errMsg.toLowerCase().includes('limit');
+
+                    if (isLimitError) {
+                        showApiKeyNotice("Current API key is out of limit. Please <strong>enter API key</strong> above to continue.");
+                        const customLimitError = new Error("Current API key is out of limit. Please enter API key.");
+                        customLimitError.isLimit = true;
+                        throw customLimitError;
+                    }
+                    throw new Error(errMsg);
+                }
+
+                // If request succeeded, hide limit warning notice
+                hideApiKeyNotice();
 
                 const jsonResponse = await response.json();
 
@@ -568,11 +707,34 @@
                     }, 100);
                 }
             } catch (error) {
-                outputText.innerHTML = `
-                    <div class="text-rose-500 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                        <strong>Connection Error:</strong> ${error.message} <br>
-                        Make sure FastAPI is running on 127.0.0.1:8000 and CORS is configured.
-                    </div>`;
+                if (error.isLimit || error.message.toLowerCase().includes('out of limit') || error.message.toLowerCase().includes('quota') || error.message.toLowerCase().includes('resourceexhausted')) {
+                    outputText.innerHTML = `
+                        <div class="text-amber-300 p-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-3 animate-in fade-in duration-300">
+                            <div class="flex items-center gap-2.5 font-bold text-base text-amber-400">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400 shrink-0"></i>
+                                <span>API Key Out of Limit</span>
+                            </div>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                The current Gemini API key has exceeded its daily or rate quota limit. Please <strong>enter API key</strong> in the top textbox to proceed with your query.
+                            </p>
+                            <div class="pt-2 flex items-center gap-3">
+                                <button onclick="focusApiKeyBox()"
+                                    class="px-4 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 rounded-xl text-xs font-semibold text-amber-200 transition-all active:scale-95 flex items-center gap-2">
+                                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                                    Enter API Key
+                                </button>
+                                <span class="text-[11px] text-slate-400">Get a free key from Google AI Studio</span>
+                            </div>
+                        </div>`;
+                    initIcons();
+                    focusApiKeyBox();
+                } else {
+                    outputText.innerHTML = `
+                        <div class="text-rose-500 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                            <strong>Connection Error:</strong> ${error.message} <br>
+                            Make sure FastAPI is running on 127.0.0.1:8000 and CORS is configured.
+                        </div>`;
+                }
             }
         }
 

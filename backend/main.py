@@ -53,6 +53,7 @@ collection = chroma_client.get_or_create_collection(
 class QueryRequest(BaseModel):
     query: str
     environment: str = "General"
+    api_key: str | None = None
 
 SYSTEM_PROMPT = """You are the backend AI Engine for a Spaceflight Fire Safety Dashboard, specializing in microgravity and partial-gravity combustion. Analyze raw text chunks retrieved from NASA's Physical Sciences Informatics (PSI) database and answer user queries.
 
@@ -102,7 +103,18 @@ def ask_dashboard(request: QueryRequest):
         retrieved_chunks = results["documents"][0]
         context_text = "\n\n---\n\n".join(retrieved_chunks)
 
-        # Step B: Send context + query to Gemini
+        # Step B: Select API key (request payload key takes priority over server .env)
+        user_key = (request.api_key.strip() if request.api_key and request.api_key.strip() else None)
+        active_key = user_key or GEMINI_API_KEY
+        if not active_key:
+            raise HTTPException(
+                status_code=400,
+                detail="Missing API key. Please enter an API key in the dashboard."
+            )
+
+        genai.configure(api_key=active_key)
+        active_model = genai.GenerativeModel("gemini-3.5-flash-lite")
+
         prompt = SYSTEM_PROMPT.format(
             context=context_text,
             environment=request.environment,
@@ -112,11 +124,21 @@ def ask_dashboard(request: QueryRequest):
         
         # Call model with secondary fallback if rate limits or quota errors occur
         try:
-            response = model.generate_content(prompt)
+            response = active_model.generate_content(prompt)
         except Exception as api_err:
+            err_str = str(api_err).lower()
             print(f"Warning: Primary model failed ({api_err}), trying fallback model...")
-            fallback_model = genai.GenerativeModel("gemini-3.1-flash-lite")
-            response = fallback_model.generate_content(prompt)
+            try:
+                fallback_model = genai.GenerativeModel("gemini-3.1-flash-lite")
+                response = fallback_model.generate_content(prompt)
+            except Exception as fb_err:
+                combined_err = f"{api_err} | {fb_err}".lower()
+                if "quota" in combined_err or "resourceexhausted" in combined_err or "429" in combined_err:
+                    raise HTTPException(
+                        status_code=429,
+                        detail="Current API key is out of limit (quota exceeded). Please enter a new API key."
+                    )
+                raise HTTPException(status_code=500, detail=str(fb_err))
         
         raw_text = response.text.strip()
         print("--- [DEBUG] 2. Received response from Gemini! ---")
@@ -147,6 +169,14 @@ def ask_dashboard(request: QueryRequest):
             "sources": retrieved_chunks  
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"ERROR: {e}")
+        err_str = str(e).lower()
+        if "quota" in err_str or "resourceexhausted" in err_str or "429" in err_str:
+            raise HTTPException(
+                status_code=429,
+                detail="Current API key is out of limit (quota exceeded). Please enter a new API key."
+            )
         raise HTTPException(status_code=500, detail=str(e))
