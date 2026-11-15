@@ -75,7 +75,8 @@
         }
 
         /* Ensure Lucide icons render with proper alignment & stroke */
-        [data-lucide], svg.lucide {
+        [data-lucide],
+        svg.lucide {
             display: inline-block;
             vertical-align: middle;
         }
@@ -536,7 +537,7 @@
                         const officialData = getOfficialPsiData(inv.investigation_name);
 
                         const nasaUrl = officialData.code !== "SEARCH"
-                            ? `https://psi.nasa.gov/physci/repo/search?q=${officialData.code}` : `https://psi.nasa.gov/physci/repo/search?q=${encodeURIComponent(inv.investigation_name)}`;
+                            ? `https://psi.nasa.gov/physci/repo/data/investigations/${officialData.code}` : `https://psi.nasa.gov/physci/repo/search?q=${encodeURIComponent(inv.investigation_name)}`;
 
                         rankingHTML += `
                             <div class="relative">

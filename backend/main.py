@@ -1,6 +1,7 @@
 import os
 import json
 from pathlib import Path
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -8,8 +9,13 @@ import chromadb
 from chromadb.utils import embedding_functions
 import google.generativeai as genai
 
+# Load environment variables from .env
+env_file = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=env_file)
+load_dotenv()
+
 # Gemini API configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6KsHlBeyRfJWlLShPkuEB3P7eLKUWZ7y7ndctZ8nM5tHQ")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-3.5-flash-lite")
 
